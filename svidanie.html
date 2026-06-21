@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Приглашение на свидание 🌹</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+body { background: linear-gradient(135deg, #fff0f4 0%, #fce4ec 50%, #fff0f4 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.screen { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; width: 100%; padding: 2rem; text-align: center; position: fixed; inset: 0; }
+.screen.active { display: flex; }
+.card { background: white; border-radius: 24px; padding: 2.5rem 2rem 2rem; max-width: 360px; width: 100%; box-shadow: 0 8px 40px rgba(232,82,122,0.12); position: relative; z-index: 2; }
+.emoji-big { font-size: 60px; margin-bottom: 1rem; display: block; }
+.title { font-size: 22px; font-weight: 600; color: #1a1a2e; margin-bottom: 0.5rem; line-height: 1.4; }
+.subtitle { font-size: 14px; color: #888; margin-bottom: 1.5rem; line-height: 1.6; }
+.btn-yes { background: #e8527a; color: white; border: none; border-radius: 50px; padding: 14px 36px; font-size: 16px; font-weight: 600; cursor: pointer; transition: transform 0.1s, background 0.1s; box-shadow: 0 4px 16px rgba(232,82,122,0.3); }
+.btn-yes:hover { background: #d4456c; transform: scale(1.04); }
+.btn-yes:active { transform: scale(0.97); }
+.btn-yes:disabled { background: #ccc; box-shadow: none; cursor: default; transform: none; }
+.btn-no { background: transparent; border: 1.5px solid #ddd; border-radius: 50px; padding: 12px 22px; font-size: 15px; color: #aaa; cursor: pointer; transition: all 0.2s; }
+.btn-row { display: flex; gap: 12px; justify-content: center; align-items: center; flex-wrap: wrap; }
+.food-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.25rem; }
+.food-item { border: 1.5px solid #f0f0f0; border-radius: 14px; padding: 16px 8px; font-size: 13px; color: #333; cursor: pointer; transition: all 0.15s; display: flex; flex-direction: column; align-items: center; gap: 6px; background: white; font-weight: 500; }
+.food-item:hover, .food-item.selected { border-color: #e8527a; background: #fff0f4; color: #c23060; }
+.food-item span { font-size: 30px; }
+.field-label { font-size: 13px; color: #888; text-align: left; margin-bottom: 6px; display: block; }
+.date-input, .time-input { border: 1.5px solid #eee; border-radius: 12px; padding: 12px 14px; font-size: 15px; width: 100%; color: #333; background: white; outline: none; transition: border-color 0.2s; }
+.date-input:focus, .time-input:focus { border-color: #e8527a; box-shadow: 0 0 0 3px rgba(232,82,122,0.1); }
+.field-row { margin-bottom: 1rem; text-align: left; }
+.confirm-detail { font-size: 15px; color: #555; line-height: 2; margin-bottom: 1.25rem; }
+.confirm-detail strong { color: #1a1a2e; font-weight: 600; }
+.tg-status { font-size: 12px; margin-top: 0.75rem; min-height: 18px; color: #aaa; }
+.tg-status.ok { color: #2e9e5b; }
+.tg-status.err { color: #c0392b; }
+.small-note { font-size: 12px; color: #aaa; margin-top: 0.75rem; min-height: 16px; }
+.hearts-bg { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+.h { position: absolute; font-size: 22px; opacity: 0.18; animation: floatUp 5s ease-in infinite; }
+@keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 0.18; } 100% { transform: translateY(-110vh) scale(0.4); opacity: 0; } }
+</style>
+</head>
+<body>
+
+<div class="hearts-bg" id="heartsBg"></div>
+
+<div id="s0" class="screen active">
+  <div class="card">
+    <span class="emoji-big">🌹</span>
+    <div class="title">Тебя приглашают на свидание!</div>
+    <div class="subtitle">Для тебя подготовили интерактивное приглашение</div>
+    <div class="btn-row">
+      <button class="btn-yes" onclick="go(1)">Открыть 💌</button>
+    </div>
+  </div>
+</div>
+
+<div id="s1" class="screen">
+  <div class="card">
+    <span class="emoji-big">🐱</span>
+    <div class="title">Ты пойдёшь со мной на свидание?</div>
+    <div class="subtitle">Жду твоего ответа с нетерпением...</div>
+    <div class="btn-row">
+      <button class="btn-yes" onclick="go(2)">Да 💕</button>
+      <button class="btn-no" id="noBtn" onmouseover="runNo()" onclick="runNo()">🙈</button>
+    </div>
+    <p class="small-note" id="noNote"></p>
+  </div>
+</div>
+
+<div id="s2" class="screen">
+  <div class="card">
+    <span class="emoji-big">🥹</span>
+    <div class="title">Подожди, ты правда сказала да?</div>
+    <div class="subtitle">Я был готов что скажешь "нет" охох</div>
+    <div class="btn-row">
+      <button class="btn-yes" onclick="go(3)">Да да да 🎉</button>
+    </div>
+  </div>
+</div>
+
+<div id="s3" class="screen">
+  <div class="card">
+    <span class="emoji-big">📅</span>
+    <div class="title">Когда ты свободна?</div>
+    <div class="subtitle">Выбери дату и время нашего свидания</div>
+    <div class="field-row">
+      <span class="field-label">Дата</span>
+      <input type="date" class="date-input" id="dateInput" />
+    </div>
+    <div class="field-row">
+      <span class="field-label">Время</span>
+      <input type="time" class="time-input" id="timeInput" value="19:00" />
+    </div>
+    <div class="btn-row">
+      <button class="btn-yes" onclick="pickDate()">Дальше →</button>
+    </div>
+  </div>
+</div>
+
+<div id="s4" class="screen">
+  <div class="card">
+    <div class="title" style="margin-bottom:0.4rem;">Что ты хочешь?</div>
+    <div class="subtitle">Выбери что тебе в кайф</div>
+    <div class="food-grid">
+      <div class="food-item" onclick="pickFood(this,'Суши')"><span>🍣</span>Суши</div>
+      <div class="food-item" onclick="pickFood(this,'Пицца')"><span>🍕</span>Пицца</div>
+      <div class="food-item" onclick="pickFood(this,'Бургер')"><span>🍔</span>Бургер</div>
+      <div class="food-item" onclick="pickFood(this,'Паста')"><span>🍝</span>Паста</div>
+      <div class="food-item" onclick="pickFood(this,'Ролтон')"><span>🍜</span>Ролтон</div>
+      <div class="food-item" onclick="pickFood(this,'Том Ям')"><span>🥣</span>Том Ям</div>
+    </div>
+  </div>
+</div>
+
+<div id="s5" class="screen">
+  <div class="card">
+    <span class="emoji-big">🥂</span>
+    <div class="title">Всё готово!</div>
+    <div class="confirm-detail" id="confirmText"></div>
+    <div class="btn-row">
+      <button class="btn-yes" id="sendBtn" onclick="sendToTelegram()">Отправить Вадиму 💌</button>
+    </div>
+    <div class="tg-status" id="tgStatus"></div>
+    <div style="margin-top:1rem;">
+      <button onclick="restart()" style="background:transparent;border:none;font-size:13px;color:#bbb;cursor:pointer;">начать сначала</button>
+    </div>
+  </div>
+</div>
+
+<div id="s6" class="screen">
+  <div class="card">
+    <span class="emoji-big">💌</span>
+    <div class="title">Вадим уже знает!</div>
+    <div class="subtitle" id="finalText"></div>
+  </div>
+</div>
+
+<script>
+const TG_TOKEN = '8001960775:AAGLPuxDAabo2RzwbKxmcAVORfbTuydviSo';
+const TG_CHAT = '1813846282';
+let chosenDate='', chosenTime='', chosenFood='', noCount=0;
+const noMessages=['Нажми "Да"!','Ну пожалуйста...','Я очень прошу 🥺','Последний шанс!','Жми ДА! 😤'];
+
+function go(n) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('s'+n).classList.add('active');
+}
+
+function runNo() {
+  const btn=document.getElementById('noBtn');
+  document.getElementById('noNote').textContent=noMessages[noCount%noMessages.length];
+  noCount++;
+  btn.style.position='relative';
+  btn.style.left=(Math.random()*120-60)+'px';
+  btn.style.top=(Math.random()*40-20)+'px';
+}
+
+function pickDate() {
+  const d=document.getElementById('dateInput').value;
+  const t=document.getElementById('timeInput').value;
+  if(!d){alert('Выбери дату!');return;}
+  const dt=new Date(d);
+  chosenDate=dt.toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});
+  chosenTime=t;
+  go(4);
+}
+
+function pickFood(el,food) {
+  chosenFood=food;
+  document.getElementById('confirmText').innerHTML=
+    `📅 <strong>${chosenDate}</strong><br>`+
+    `🕐 <strong>${chosenTime}</strong><br>`+
+    `🍽 <strong>${food}</strong><br>`+
+    `🌹 Ужин на двоих`;
+  go(5);
+}
+
+async function sendToTelegram() {
+  const btn=document.getElementById('sendBtn');
+  const status=document.getElementById('tgStatus');
+  btn.disabled=true; btn.textContent='Отправляю...';
+  const text=`💌 Новый ответ на приглашение!\n\n✅ Она согласилась на свидание!\n\n📅 Дата: ${chosenDate}\n🕐 Время: ${chosenTime}\n🍽 Хочет: ${chosenFood}\n\n🌹 Удачи на свидании!`;
+  try {
+    const res=await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({chat_id:TG_CHAT,text})
+    });
+    const data=await res.json();
+    if(data.ok){
+      document.getElementById('finalText').textContent=`Вадим получил уведомление! ${chosenFood} на ${chosenDate} в ${chosenTime} 🎉`;
+      go(6);
+    } else {
+      status.className='tg-status err';
+      status.textContent='Ошибка: '+(data.description||'попробуй снова');
+      btn.disabled=false; btn.textContent='Отправить Вадиму 💌';
+    }
+  } catch(e) {
+    status.className='tg-status err';
+    status.textContent='Нет соединения, попробуй снова';
+    btn.disabled=false; btn.textContent='Отправить Вадиму 💌';
+  }
+}
+
+function restart(){noCount=0;chosenDate='';chosenTime='';chosenFood='';go(0);}
+
+const bg=document.getElementById('heartsBg');
+for(let i=0;i<16;i++){
+  const h=document.createElement('div');
+  h.className='h';
+  h.textContent=['❤️','🩷','💕','💗'][Math.floor(Math.random()*4)];
+  h.style.left=Math.random()*100+'%';
+  h.style.top=Math.random()*100+'%';
+  h.style.animationDelay=(Math.random()*5)+'s';
+  h.style.animationDuration=(4+Math.random()*4)+'s';
+  bg.appendChild(h);
+}
+</script>
+</body>
+</html>
